@@ -215,7 +215,7 @@ table.t td.x{width:28px;text-align:center}
    </div>
   </div>
   <div class="card" style="text-align:center">
-   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn" id="bXlsx2" style="font-size:15px;padding:9px 20px">⬇ ดาวน์โหลด Excel</button><button class="btn" id="bPdf2" style="font-size:15px;padding:9px 20px">⬇ ดาวน์โหลด PDF</button></div>
+   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn" id="bXlsx2" style="font-size:15px;padding:9px 20px">⬇ ดาวน์โหลด Excel</button><button class="btn" id="bPdf2" style="font-size:15px;padding:9px 20px">⬇ ดาวน์โหลด PDF</button><button class="btn" id="bShare" hidden style="font-size:15px;padding:9px 20px;background:#06c755;border-color:#06c755;color:#fff;font-weight:600">📤 แชร์ไฟล์ (LINE)</button></div>
   </div>
   <div class="card" id="sendCard" style="text-align:center">
    <button class="btn" id="bSend" style="font-size:16px;padding:10px 26px;background:#16a34a;border-color:#16a34a;color:#fff;font-weight:600">บันทึก (Submit)</button>
@@ -392,7 +392,7 @@ async function addFiles(files,start){
 
 /* ---------- saving ---------- */
 function queue(fn){const p=writeChain.then(fn);writeChain=p.catch(()=>{});return p}
-function touch(now){dirty=true;setSt("ยังไม่บันทึก…");clearTimeout(saveT);saveT=setTimeout(save,now?50:1100)}
+function touch(now){dirty=true;shareCache=null;setSt("ยังไม่บันทึก…");clearTimeout(saveT);saveT=setTimeout(save,now?50:1100)}
 async function save(){
  if(!dirty||!R)return;dirty=false;const snap=JSON.parse(JSON.stringify(R));snap.updatedAt=new Date().toISOString();
  setSt("กำลังบันทึก…");
@@ -563,7 +563,7 @@ $("#bSend").onclick=async()=>{
   const r=await fetch("/api/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
   if(!r.ok)throw{msg:j.error==="not_configured"?"ยังไม่ได้ตั้งค่าอีเมลบน Vercel (RESEND_API_KEY / MAIL_TO)":r.status===404?"ไม่พบระบบส่งอีเมลบนเว็บนี้ (ต้องมีไฟล์ api/send.js ใน repo)":"ส่งไม่สำเร็จ (HTTP "+r.status+")"+(j.detail?": "+j.detail:"")};
-  R.submittedAt=new Date().toISOString();R.sendCount=(R.sendCount||0)+1;touch(true);showSent();toast("บันทึกเรียบร้อย ✓",3500)}
+  R.submittedAt=new Date().toISOString();R.sendCount=(R.sendCount||0)+1;touch(true);showSent();toast(j.driveUrl?"บันทึกเรียบร้อย ✓ ส่งอีเมลและเก็บใน Google Drive แล้ว":j.driveNote?"ส่งอีเมลแล้ว ✓ แต่เก็บ Google Drive ไม่สำเร็จ ("+j.driveNote+")":"บันทึกเรียบร้อย ✓",j.driveNote?6000:3500)}
  catch(e){console.error(e);toast(e&&e.msg?e.msg:"ส่งไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",5000)}
  finally{b.disabled=false;showSent()}};
 function showSent(){const e=$("#sentInfo"),b=$("#bSend");if(!e)return;const sent=R&&R.submittedAt;
@@ -571,8 +571,26 @@ function showSent(){const e=$("#sentInfo"),b=$("#bSend");if(!e)return;const sent
  if(b&&!b.disabled)b.textContent=sent?"บันทึกฉบับแก้ไข (Submit)":"บันทึก (Submit)"}
 
 $("#bXlsx2").onclick=()=>$("#bXlsx").click();$("#bPdf2").onclick=()=>$("#bPdf").click();
+/* ---------- share (LINE / mobile share sheet) ---------- */
+let shareCache=null;
+const XMIME="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+async function doShare(files){await navigator.share({files,title:files[0].name})}
+$("#bShare").onclick=async()=>{
+ const b=$("#bShare");
+ if(shareCache){try{await doShare(shareCache)}catch(e){if(e&&e.name!=="AbortError")toast("แชร์ไม่สำเร็จ ลองใหม่อีกครั้ง",4000)}return}
+ if(!window.ExcelJS||!window.html2canvas||!window.jspdf){toast("โหลดไลบรารีไม่สำเร็จ");return}
+ b.disabled=true;b.textContent="กำลังเตรียมไฟล์…";
+ try{const[x,p]=await Promise.all([buildXlsx({pw:1200,q:.8}),buildPdf({scale:1.6,q:.85})]);
+  const files=[new File([p],fname("pdf"),{type:"application/pdf"}),new File([x],fname("xlsx"),{type:XMIME})];
+  const ok=navigator.canShare&&navigator.canShare({files});
+  const use=ok?files:(navigator.canShare&&navigator.canShare({files:[files[0]]})?[files[0]]:null);
+  if(!use){toast("อุปกรณ์นี้แชร์ไฟล์ไม่ได้ — ใช้ปุ่มดาวน์โหลด แล้วแนบไฟล์ใน LINE",5000);return}
+  shareCache=use;
+  try{await doShare(use)}catch(e){if(e&&e.name==="NotAllowedError"){b.disabled=false;b.textContent="📤 แตะอีกครั้งเพื่อแชร์";return}if(e&&e.name!=="AbortError")toast("แชร์ไม่สำเร็จ ลองใหม่อีกครั้ง",4000)}}
+ catch(e){console.error(e);toast("เตรียมไฟล์ไม่สำเร็จ",4000)}
+ finally{if(b.textContent!=="📤 แตะอีกครั้งเพื่อแชร์"){b.disabled=false;b.textContent="📤 แชร์ไฟล์ (LINE)"}else b.disabled=false}};
 /* ---------- boot ---------- */
-if(!(window.claude&&window.claude.use)&&location.protocol.startsWith("http"))document.getElementById("sw").hidden=false;
+if(!(window.claude&&window.claude.use)&&location.protocol.startsWith("http")){document.getElementById("sw").hidden=false;if(navigator.share)document.getElementById("bShare").hidden=false}
 async function boot(){
  R=blank(todayISO());renderAll();setSt("กำลังเชื่อมต่อ…");
  let useDb=null;
