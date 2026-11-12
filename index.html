@@ -158,7 +158,7 @@ table.t td.x{width:28px;text-align:center}
     <label class="f">Project No. / โครงการเลขที่<input class="inp" data-k="projectNo"></label>
     <label class="f">วันที่ทำงาน (Date)<input class="inp" id="fDate" disabled></label>
     <label class="f">วันที่เขียนรายงาน<input class="inp" type="date" data-k="writtenDate"></label>
-    <label class="f">เวลา (Time)<input class="inp" data-k="time"></label>
+    <label class="f">เวลา (Time)<div style="display:flex;align-items:center;gap:6px"><input class="inp" type="time" id="tStart"><span style="color:var(--mute)">–</span><input class="inp" type="time" id="tEnd"></div></label>
    </div>
   </div>
 
@@ -219,8 +219,8 @@ const LOGO="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAACZCAYAAABg307yAA
 const ONEM="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";
 const PREFIX="COL/ONE-M/SKY/DRP/AC/";
 const MAX={machines:20,crew:20,works:10,photos:60};
-const DEF_M=["สว่านไฟฟ้า","เลเซอร์วัดระดับ","Conduit Blender"];
-const DEF_C=["วิศวกรโครงการ","วิศวกรคุมงาน","วิศวกร","คนเขียนแบบ","โฟร์แมน","ช่างไม้","ช่างเหล็ก","ช่างปูน","ช่างไฟฟ้า","ช่างประปา","ช่างปรับอากาศ","ช่างยนต์","ช่างสำรวจ","ช่างเชื่อม","กรรมกร"];
+const DEF_M=["Steel cutting machine","Welding machine","Grinding machine","Spirit levels","Hammer","Measuring tape","Pliers","Wrench","Drilling machine","Roller paint brush","Safety Harness"];
+const DEF_C=["Project Manager","Project Engineer","Site Engineer","Foreman","Draftman","Administrator","Store Keeper","Safety Officer","Electrical Worker","Sanitary Worker","Air condition Worker","Duct Worker","Workers"];
 // slot aspect (W/H) of the photo cells in the Excel template: left / right column
 const SLOT_PX=[[556,376],[598,376]];
 
@@ -258,9 +258,10 @@ let list=[];           // saved reports (summary)
 let writeChain=Promise.resolve(),dirty=false,saveT=null;
 
 function blank(date){return{date,reportNo:"",projectNo:"",writtenDate:date,time:"10:00-18:00",
- machines:DEF_M.map(n=>({name:n,today:"",cum:""})),crew:DEF_C.map(n=>({name:n,today:"",cum:""})),
+ machines:DEF_M.map(n=>({name:n,today:"0",cum:"0"})),crew:DEF_C.map(n=>({name:n,today:"0",cum:"0"})),
  works:[{task:"",area:"",today:"",prev:"",unit:"%",detail:""},{task:"",area:"",today:"",prev:"",unit:"%",detail:""},{task:"",area:"",today:"",prev:"",unit:"%",detail:""}],
  sig:{name1:"",name2:"",name3:"",pos1:"ผู้ควบคุมงาน",pos2:"วิศวกรสนาม",pos3:"ผู้จัดการหน่วยงาน"},photos:Array.from({length:6},()=>({pid:"",cap:""}))}}
+const z0=v=>has(v)?v:"0";
 const cumOf=r=>r.cum!==undefined?(has(r.cum)?num(r.cum):""):((has(r.today)||has(r.base))?num(r.base)+num(r.today):"");
 const totOf=w=>(has(w.today)||has(w.prev))?num(w.prev)+num(w.today):"";
 
@@ -268,8 +269,8 @@ function seedFrom(prev,date){
  const r=blank(date);if(!prev)return r;
  const n=parseInt(prev.reportNo,10);if(isFinite(n))r.reportNo=String(n+1).padStart(String(prev.reportNo).length,"0");
  r.projectNo=prev.projectNo||"";r.time=prev.time||r.time;r.sig={...r.sig,...(prev.sig||{})};
- r.machines=(prev.machines||[]).filter(m=>has(m.name)).map(m=>({name:m.name,today:"",cum:"",hint:fmtRaw(cumOf(m))}));
- r.crew=(prev.crew||[]).filter(m=>m.name!=="ยาม").map(m=>({name:m.name,today:"",cum:"",hint:fmtRaw(cumOf(m))}));
+ r.machines=(prev.machines||[]).filter(m=>has(m.name)).map(m=>({name:m.name,today:"0",cum:"",hint:fmtRaw(cumOf(m))}));
+ r.crew=(prev.crew||[]).filter(m=>m.name!=="ยาม").map(m=>({name:m.name,today:"0",cum:"",hint:fmtRaw(cumOf(m))}));
  const ws=(prev.works||[]).filter(w=>has(w.task)||has(w.area));
  if(ws.length)r.works=ws.map(w=>({task:w.task,area:w.area,today:"",prev:fmtRaw(totOf(w)),unit:w.unit||"%",detail:""}));
  return r}
@@ -289,13 +290,16 @@ function rowsHTML(kind){
   <td class="x"><button class="xbtn" data-del title="ลบ">×</button></td></tr>`).join("");
  return a.map((m,i)=>`<tr data-i="${i}">
   <td><input class="inp" data-f="name" value="${esc(m.name)}" placeholder="${kind==="machines"?"ชื่อเครื่องจักร":"ตำแหน่ง"}"></td>
-  <td class="n"><input class="inp" data-f="today" inputmode="decimal" value="${esc(m.today)}"></td>
+  <td class="n"><input class="inp" data-f="today" inputmode="decimal" value="${esc(m.today)}" placeholder="0"></td>
   <td class="n"><input class="inp" data-f="cum" inputmode="decimal" value="${esc(m.cum!==undefined?m.cum:fmtRaw(cumOf(m)))}"${has(m.hint)?` placeholder="เดิม ${esc(m.hint)}"`:""}></td>
   <td class="x"><button class="xbtn" data-del title="ลบ">×</button></td></tr>`).join("")}
 const TB={machines:"#tbM",crew:"#tbC",works:"#tbW"};
 function renderRows(kind){$(TB[kind]).innerHTML=rowsHTML(kind);document.querySelector(`[data-add="${kind}"]`).disabled=R[kind].length>=MAX[kind];if(kind==="crew")sums()}
 function sums(){let t=0,c=0,any=false;R.crew.forEach(m=>{t+=num(m.today);const v=cumOf(m);if(v!=="")c+=v;if(has(m.today))any=true});$("#sumToday").textContent=fmt(t);$("#sumCum").textContent=fmt(c)}
+function syncTime(){const[a,b]=String(R.time||"").split("-").map(x=>x.trim());const n=t=>/^\d{1,2}:\d{2}$/.test(t||"")?t.padStart(5,"0"):"";$("#tStart").value=n(a);$("#tEnd").value=n(b)}
+["#tStart","#tEnd"].forEach(id=>$(id).addEventListener("input",()=>{const a=$("#tStart").value,b=$("#tEnd").value;R.time=a||b?`${a}-${b}`:"";touch()}));
 function renderAll(){
+ syncTime();
  try{showSent()}catch(e){}
  document.querySelectorAll("[data-k]").forEach(el=>{el.value=el.dataset.k.split(".").reduce((o,k)=>o?.[k],R)??""});
  $("#fDate").value=be(R.date);$("#dpick").value=R.date;
@@ -395,7 +399,7 @@ async function openDate(d){
 /* ---------- preview (A4 replica of the template) ---------- */
 function page1(){
  const mRows=Array.from({length:20},(_,i)=>R.machines[i]||{});const cRows=Array.from({length:20},(_,i)=>R.crew[i]||{});const wRows=Array.from({length:10},(_,i)=>R.works[i]||{});
- const side=(rows,h)=>`<table class="box"><thead><tr><th style="width:52%">${h}</th><th>วันนี้</th><th>สะสม</th></tr></thead><tbody>${rows.map(m=>`<tr><td>${esc(m.name)}</td><td class="c">${esc(m.today)}</td><td class="c">${m.name?fmt(cumOf(m)):""}</td></tr>`).join("")}</tbody></table>`;
+ const side=(rows,h,zf)=>`<table class="box"><thead><tr><th style="width:52%">${h}</th><th>วันนี้</th><th>สะสม</th></tr></thead><tbody>${rows.map(m=>`<tr><td>${esc(m.name)}</td><td class="c">${zf&&m.name?esc(z0(m.today)):esc(m.today)}</td><td class="c">${m.name?(zf?fmt(cumOf(m)===""?0:cumOf(m)):fmt(cumOf(m))):""}</td></tr>`).join("")}</tbody></table>`;
  return `<div class="page">
  <div class="p-head"><div class="l"><div style="display:flex;align-items:center;gap:14px"><img src="data:image/png;base64,${ONEM}" style="height:62px"><img src="${LOGO}"></div><div class="tt">Daily Construction Report<br><span style="font-weight:700">รายงานการก่อสร้างประจำวัน</span></div></div>
  <div class="r"><div class="co">Coral Life. CO., LTD.</div>
@@ -405,7 +409,7 @@ function page1(){
   <div class="kv2"><b>Date :</b><div class="v" style="border-bottom:1px solid #000;padding:0 4px">${be(R.date)}</div><b style="text-align:right;padding-right:4px">Time :</b><div style="border-bottom:1px solid #000;padding:0 4px">${esc(R.time)}</div></div>
   <div class="kv2" style="font-size:10.5px"><span>วันที่</span><span></span><span style="text-align:right;padding-right:4px">เวลา</span><span></span></div>
  </div></div>
- <div class="twin">${side(mRows,"เครื่องจักรทำงาน")}${side(cRows,"ผู้ปฏิบัติงาน")}</div>
+ <div class="twin">${side(mRows,"เครื่องจักรทำงาน",1)}${side(cRows,"ผู้ปฏิบัติงาน",1)}</div>
  <div class="box" style="margin-top:12px"><div class="sec-t">ผลการดำเนินงาน</div>
  <table><thead><tr><th style="width:17%">งาน</th><th style="width:11%">พื้นที่</th><th style="width:7%">วันนี้</th><th style="width:8%">วันก่อนๆ</th><th style="width:9%">รวมทั้งสิ้น</th><th style="width:8%">หน่วย (%)</th><th>รายละเอียดการดำเนินการ</th></tr></thead>
  <tbody>${wRows.map(w=>`<tr><td>${esc(w.task)}</td><td>${esc(w.area)}</td><td class="c">${esc(w.today)}</td><td class="c">${esc(w.prev)}</td><td class="c">${w.task||w.area?fmt(totOf(w)):""}</td><td class="c">${w.task||w.area?esc(w.unit):""}</td><td>${esc(w.detail)}</td></tr>`).join("")}</tbody></table></div>
@@ -445,6 +449,8 @@ function cloneSheet(wb,src,name){
  for(let r=1;r<=src.rowCount;r++){const sr=src.getRow(r),dr=d.getRow(r);if(sr.height)dr.height=sr.height;
   for(let c=1;c<=src.columnCount;c++){const sc=sr.getCell(c),dc=dr.getCell(c);dc.style=cp(sc.style);if(sc.type!==ExcelJS.ValueType.Merge)dc.value=sc.value}}
  return d}
+const own=c=>{c.style=JSON.parse(JSON.stringify(c.style||{}));return c};
+function mergeKeep(ws,cols,r){const st=[...cols].map(c=>JSON.parse(JSON.stringify(ws.getCell(c+r).style||{})));try{ws.mergeCells(`${cols[0]}${r}:${cols.at(-1)}${r}`)}catch(e){return}[...cols].forEach((c,i)=>{ws.getCell(c+r).style=st[i]});const m=ws.getCell(cols[0]+r);m.alignment={...(st[0].alignment||{}),shrinkToFit:true}}
 const val=v=>{if(!has(v))return null;const n=Number(String(v).replace(/,/g,""));return isFinite(n)?n:String(v)};
 
 async function buildXlsx(o={}){
@@ -455,15 +461,15 @@ async function buildXlsx(o={}){
   ws.addImage(wb.addImage({base64:ONEM,extension:"png"}),{tl:{col:0.3,row:0.08},ext:{width:80,height:76},editAs:"oneCell"});
   ws.getCell("R3").value=R.projectNo||null;
   ws.getCell("R7").value=PREFIX+(R.reportNo||"");
-  ws.getCell("R9").value=be(R.date);ws.getCell("W9").value=R.time||null;
+  ws.getCell("R9").value=be(R.date);{const t=own(ws.getCell("W9"));t.value=R.time||null;t.alignment={horizontal:"center",vertical:"bottom",shrinkToFit:true}}
   for(let r=14;r<=33;r++){["A","F","I","N","R","U"].forEach(c=>{ws.getCell(c+r).value=null})}
-  R.machines.slice(0,20).forEach((m,i)=>{const r=14+i;ws.getCell("A"+r).value=m.name||null;ws.getCell("F"+r).value=val(m.today);const c=cumOf(m);ws.getCell("I"+r).value=c===""?null:c});
-  R.crew.slice(0,20).forEach((m,i)=>{const r=14+i;ws.getCell("N"+r).value=m.name||null;ws.getCell("R"+r).value=val(m.today);const c=cumOf(m);ws.getCell("U"+r).value=c===""?null:c});
+  R.machines.slice(0,20).forEach((m,i)=>{const r=14+i;ws.getCell("A"+r).value=m.name||null;if(!has(m.name))return;mergeKeep(ws,"ABCDE",r);ws.getCell("F"+r).value=val(z0(m.today));const c=cumOf(m);ws.getCell("I"+r).value=c===""?0:c});
+  R.crew.slice(0,20).forEach((m,i)=>{const r=14+i;ws.getCell("N"+r).value=m.name||null;if(!has(m.name))return;mergeKeep(ws,"NOPQ",r);ws.getCell("R"+r).value=val(z0(m.today));const c=cumOf(m);ws.getCell("U"+r).value=c===""?0:c});
   R.works.slice(0,10).forEach((w,i)=>{const r=37+i,t=totOf(w),on=has(w.task)||has(w.area);
    ws.getCell("A"+r).value=w.task||null;ws.getCell("F"+r).value=w.area||null;ws.getCell("I"+r).value=val(w.today);ws.getCell("K"+r).value=val(w.prev);
-   try{ws.unMergeCells("M"+r)}catch(e){}try{ws.mergeCells(`M${r}:O${r}`)}catch(e){}const mc=ws.getCell("M"+r);mc.value=t===""?null:t;mc.alignment={horizontal:"center",vertical:"middle"};mc.font={...(ws.getCell("I"+r).font||{})};ws.getCell("P"+r).value=on?(w.unit||null):null;try{ws.mergeCells(`R${r}:X${r}`)}catch(e){}const dc=ws.getCell("R"+r);dc.value=w.detail||null;dc.alignment={horizontal:"left",vertical:"middle",shrinkToFit:true}});
+   try{ws.unMergeCells("M"+r)}catch(e){}try{ws.mergeCells(`M${r}:O${r}`)}catch(e){}const mc=own(ws.getCell("M"+r));mc.value=t===""?null:t;mc.alignment={horizontal:"center",vertical:"middle"};mc.font={...(ws.getCell("I"+r).font||{})};ws.getCell("P"+r).value=on?(w.unit||null):null;try{ws.mergeCells(`R${r}:X${r}`)}catch(e){}const dc=own(ws.getCell("R"+r));dc.value=w.detail||null;dc.alignment={horizontal:"left",vertical:"middle",shrinkToFit:true}});
   [["A51",R.sig.pos1],["H51",R.sig.pos2],["Q51",R.sig.pos3]].forEach(([a,v])=>{ws.getCell(a).value=has(v)?v:null});
-  [["A50:F50",R.sig.name1],["H50:N50",R.sig.name2],["Q50:W50",R.sig.name3]].forEach(([rg,v])=>{if(!has(v))return;try{ws.mergeCells(rg)}catch(e){}const c=ws.getCell(rg.split(":")[0]);c.value=v;c.alignment={horizontal:"center",vertical:"bottom"};c.font={...(ws.getCell(rg.split(":")[0].replace("50","51")).font||{}),bold:false}});
+  [["A50:F50",R.sig.name1],["H50:N50",R.sig.name2],["Q50:W50",R.sig.name3]].forEach(([rg,v])=>{if(!has(v))return;try{ws.mergeCells(rg)}catch(e){}const c=own(ws.getCell(rg.split(":")[0]));c.value=v;c.alignment={horizontal:"center",vertical:"bottom"};c.font={...(ws.getCell(rg.split(":")[0].replace("50","51")).font||{}),bold:false}});
   const p=wb.getWorksheet("ภาพประกอบ DRP");
   p.getCell("H3").value="  เลขที่ "+PREFIX+(R.reportNo||"");p.getCell("H4").value="  วันที่เขียน : "+be(R.writtenDate);p.getCell("H5").value="  ทำงานวันที่ : "+be(R.date);
   const SL=[[0,11,"A24"],[5,11,"F24"],[0,25,"A38"],[5,25,"F38"],[0,39,"A52"],[5,39,"F52"]];
@@ -471,7 +477,7 @@ async function buildXlsx(o={}){
   for(let k=1;k<chunks.length;k++)sheets.push(cloneSheet(wb,p,`ภาพประกอบ DRP (${k+1})`));
   for(let k=0;k<chunks.length;k++){const p=sheets[k];
   for(let i=0;i<6;i++){const ph=chunks[k][i],[c0,r0,capCell]=SL[i];
-   if(ph.cap){const c=p.getCell(capCell);c.value=ph.cap;c.font={...(c.font||{}),size:14};c.alignment={horizontal:"left",vertical:"middle"}}
+   if(ph.cap){const c=own(p.getCell(capCell));c.value=ph.cap;c.font={...(c.font||{}),size:14};c.alignment={horizontal:"left",vertical:"middle"}}
    const src=ph.pid&&photoData[ph.pid];if(!src)continue;
    const[W,H]=SLOT_PX[i%2];const b64=await letterbox(src,W/H,o.pw||1400,o.q||.85);const id=wb.addImage({base64:b64,extension:"jpeg"});
    p.addImage(id,{tl:{col:c0+.04,row:r0+.12},ext:{width:W,height:H},editAs:"oneCell"})}}
