@@ -156,7 +156,7 @@ table.t td.x{width:28px;text-align:center}
   <button class="btn" id="bXlsx">⬇ Excel</button>
   <button class="btn pri" id="bPdf">⬇ PDF</button>
  </div>
- <div class="tabs"><button class="tab on" data-t="form">กรอกข้อมูล</button><button class="tab" data-t="pv">ตัวอย่างฟอร์ม</button><a class="nav" id="navDrq" href="https://drq-sgr.vercel.app/" hidden>Daily Request →</a></div>
+ <div class="tabs"><button class="tab on" data-t="form">กรอกข้อมูล</button><button class="tab" data-t="pv">Preview Report</button><a class="nav" id="navDrq" href="https://drq-sgr.vercel.app/" hidden>Daily Request →</a></div>
 </div>
 
 <main>
@@ -207,6 +207,9 @@ table.t td.x{width:28px;text-align:center}
     <div class="sg"><div class="sgt">ผู้ลงนาม 2 · Reported by</div><label class="f">ชื่อ<input class="inp" data-k="sig.name2" placeholder="ชื่อ-นามสกุล"></label><label class="f">ตำแหน่ง<input class="inp" data-k="sig.pos2" placeholder="วิศวกรสนาม"></label></div>
     <div class="sg"><div class="sgt">ผู้ลงนาม 3 · Checked by</div><label class="f">ชื่อ<input class="inp" data-k="sig.name3" placeholder="ชื่อ-นามสกุล"></label><label class="f">ตำแหน่ง<input class="inp" data-k="sig.pos3" placeholder="ผู้จัดการหน่วยงาน"></label></div>
    </div>
+  </div>
+  <div class="card" style="text-align:center">
+   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn" id="bXlsx2" style="font-size:15px;padding:9px 20px">⬇ ดาวน์โหลด Excel</button><button class="btn" id="bPdf2" style="font-size:15px;padding:9px 20px">⬇ ดาวน์โหลด PDF</button></div>
   </div>
   <div class="card" id="sendCard" style="display:none;text-align:center">
    <button class="btn pri" id="bSend" style="font-size:16px;padding:10px 26px">ส่งรายงาน (Submit)</button>
@@ -555,6 +558,7 @@ function showSent(){const e=$("#sentInfo"),b=$("#bSend");if(!e)return;const sent
  e.textContent=sent?`ส่งแล้ว ${R.sendCount||1} ครั้ง · ล่าสุด ${new Date(R.submittedAt).toLocaleString("th-TH")} — แก้ไขข้อมูลได้ แล้วกดส่งฉบับแก้ไข`:"";
  if(b&&!b.disabled)b.textContent=sent?"ส่งฉบับแก้ไข (Re-submit)":"ส่งรายงาน (Submit)"}
 
+$("#bXlsx2").onclick=()=>$("#bXlsx").click();$("#bPdf2").onclick=()=>$("#bPdf").click();
 /* ---------- boot ---------- */
 async function boot(){
  R=blank(todayISO());renderAll();setSt("กำลังเชื่อมต่อ…");
