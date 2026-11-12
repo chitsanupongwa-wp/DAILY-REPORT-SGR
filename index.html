@@ -157,7 +157,7 @@ table.t td.x{width:28px;text-align:center}
   <button class="btn" id="bXlsx">⬇ ดาวน์โหลด Excel</button>
   <button class="btn pri" id="bPdf">⬇ ดาวน์โหลด PDF</button>
  </div>
- <div class="tabs"><button class="tab on" data-t="form">กรอกข้อมูล</button><button class="tab" data-t="pv">Preview Report</button><a class="nav" id="navDrq" href="https://drq-sgr.vercel.app/" hidden>Daily Request →</a></div>
+ <div class="tabs"><button class="tab on" data-t="form">กรอกข้อมูล</button><button class="tab" data-t="pv">Preview Report</button><a class="nav" id="navDrq" href="drq.html" hidden>Daily Request →</a></div>
 </div>
 
 <main>
@@ -217,7 +217,7 @@ table.t td.x{width:28px;text-align:center}
    <p class="hint" id="sentInfo"></p>
    <p class="hint">ส่งทางอีเมลพร้อมแนบไฟล์ PDF และ Excel</p>
   </div>
-  <p class="hint" style="text-align:center;margin-bottom:30px">บันทึกอัตโนมัติขณะพิมพ์ · รายงานวันใหม่จะดึงรายชื่อ, ยอดสะสม และงานจากรายงานล่าสุดมาให้</p>
+  <div style="height:24px"></div>
  </section>
 
  <section id="vPv" hidden><div class="pvwrap" id="pv"></div></section>
@@ -251,19 +251,21 @@ function ask(t){return new Promise(r=>{$("#mTxt").textContent=t;$("#modal").clas
 function setSt(t,c=""){const e=$("#st");e.textContent=t;e.className="status "+c}
 
 /* ---------- storage layer: shared db when available, else this browser ---------- */
-let db=null,dl=null,canWrite=true;
+let db=null,dl=null,canWrite=true,inClaude=false;
 const IDB=(()=>{let p=null;const open=()=>p||(p=new Promise((ok,no)=>{try{const r=indexedDB.open("drp38",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}}));
  const tx=(mode,fn)=>open().then(d=>new Promise((ok,no)=>{const t=d.transaction("kv",mode),st=t.objectStore("kv");const q=fn(st);t.oncomplete=()=>ok(q&&q.result);t.onerror=()=>no(t.error);t.onabort=()=>no(t.error)}));
  return{get:k=>tx("readonly",s=>s.get(k)),set:(k,v)=>tx("readwrite",s=>s.put(v,k)),del:k=>tx("readwrite",s=>s.delete(k)),
   list:pre=>open().then(d=>new Promise((ok,no)=>{const out=[];const c=d.transaction("kv").objectStore("kv").openCursor(IDBKeyRange.bound(pre,pre+"\uffff"));c.onsuccess=()=>{const x=c.result;if(x){out.push(x.value);x.continue()}else ok(out)};c.onerror=()=>no(c.error)}))}})();
 const LS={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+// no persistence: every visit starts from the default form (photos kept in memory for this visit only)
+const MEM={};
 const store={
- async getReport(d){if(db){const s=await db.doc("reports/"+d).get();return s.exists?JSON.parse(JSON.stringify(s.data())):null}try{return (await IDB.get("r:"+d))||LS.get("drp38:r:"+d)}catch(e){return LS.get("drp38:r:"+d)}},
- async setReport(d,v){if(db)return db.doc("reports/"+d).set(v);try{await IDB.set("r:"+d,v)}catch(e){if(!LS.set("drp38:r:"+d,v))throw{code:"local_full"}}},
- async getPhoto(id){if(db){const s=await db.doc("photos/"+id).get();return s.exists?s.data().data:null}try{return (await IDB.get("p:"+id))||LS.get("drp38:p:"+id)}catch(e){return LS.get("drp38:p:"+id)}},
- async setPhoto(id,data){if(db)return db.doc("photos/"+id).set({data});try{await IDB.set("p:"+id,data)}catch(e){if(!LS.set("drp38:p:"+id,data))throw{code:"local_full"}}},
- async delPhoto(id){if(db)return db.doc("photos/"+id).delete();try{await IDB.del("p:"+id)}catch(e){}LS.del("drp38:p:"+id)},
- async localList(){let out=[];try{out=await IDB.list("r:")}catch(e){}const seen=new Set(out.map(r=>r.date));try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith("drp38:r:")){const v=LS.get(k);if(v&&!seen.has(v.date))out.push(v)}}}catch(e){}return out}
+ async getReport(d){return null},
+ async setReport(d,v){},
+ async getPhoto(id){return MEM[id]||null},
+ async setPhoto(id,data){MEM[id]=data},
+ async delPhoto(id){delete MEM[id]},
+ async localList(){return[]}
 };
 
 /* ---------- state ---------- */
@@ -536,7 +538,7 @@ function mailHtml(){
  <p><b>ผู้ปฏิบัติงานวันนี้ (${fmt(tot)} คน):</b> ${crew}</p><p><b>ผลการดำเนินงาน</b></p><ul>${works}</ul>
  <p>ภาพประกอบ ${R.photos.filter(p=>p.pid).length} ภาพ · ไฟล์ PDF และ Excel แนบมาด้วย</p></div>`}
 $("#bSend").onclick=async()=>{
- if(db||!location.protocol.startsWith("http")){clearTimeout(saveT);dirty=true;await save();toast("บันทึกแล้ว ✓ — การส่งอีเมลใช้ได้บนเว็บ drp-sgr.vercel.app",5000);return}
+ if(inClaude||!location.protocol.startsWith("http")){toast("การส่งอีเมลใช้ได้บนเว็บ drp-sgr.vercel.app",5000);return}
  if(!window.ExcelJS||!window.html2canvas||!window.jspdf){toast("โหลดไลบรารีไม่สำเร็จ");return}
  if(!has(R.reportNo)){toast("กรุณากรอกเลขที่รายงานก่อนส่ง");$("#fNo").focus();return}
  if(!await ask(`${R.submittedAt?"ส่งฉบับแก้ไขของ":"ส่ง"}รายงานวันที่ ${be(R.date)} (No.${R.reportNo}) ทางอีเมล พร้อมไฟล์ PDF และ Excel?`))return;
@@ -553,12 +555,12 @@ $("#bSend").onclick=async()=>{
   if(!body)throw{msg:"ไฟล์ใหญ่เกินกว่าจะส่งทางอีเมล — ลองลดจำนวนภาพ"};
   const r=await fetch("/api/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
-  if(!r.ok)throw{msg:j.error==="not_configured"?"ยังไม่ได้ตั้งค่าอีเมลบน Vercel (RESEND_API_KEY / MAIL_TO)":"ส่งไม่สำเร็จ"+(j.detail?": "+j.detail:"")};
+  if(!r.ok)throw{msg:j.error==="not_configured"?"ยังไม่ได้ตั้งค่าอีเมลบน Vercel (RESEND_API_KEY / MAIL_TO)":r.status===404?"ไม่พบระบบส่งอีเมลบนเว็บนี้ (ต้องมีไฟล์ api/send.js ใน repo)":"ส่งไม่สำเร็จ (HTTP "+r.status+")"+(j.detail?": "+j.detail:"")};
   R.submittedAt=new Date().toISOString();R.sendCount=(R.sendCount||0)+1;touch(true);showSent();toast("ส่งรายงานเรียบร้อย ✓",3500)}
  catch(e){console.error(e);toast(e&&e.msg?e.msg:"ส่งไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",5000)}
  finally{b.disabled=false;showSent()}};
 function showSent(){const e=$("#sentInfo"),b=$("#bSend");if(!e)return;const sent=R&&R.submittedAt;
- e.textContent=sent?`ส่งแล้ว ${R.sendCount||1} ครั้ง · ล่าสุด ${new Date(R.submittedAt).toLocaleString("th-TH")} — แก้ไขข้อมูลได้ แล้วกดส่งฉบับแก้ไข`:"";
+ e.textContent=sent?`ส่งแล้ว ${R.sendCount||1} ครั้ง · ล่าสุด ${new Date(R.submittedAt).toLocaleString("th-TH")} — แก้ไขแล้วกดส่งซ้ำได้`:"";
  if(b&&!b.disabled)b.textContent=sent?"บันทึกและส่งอีเมลฉบับแก้ไข (Submit)":"บันทึกและส่งอีเมล (Submit)"}
 
 $("#bXlsx2").onclick=()=>$("#bXlsx").click();$("#bPdf2").onclick=()=>$("#bPdf").click();
@@ -571,7 +573,7 @@ async function boot(){
   try{useDb=await claude.use("db")}catch(e){}
   try{const u=await claude.use("user");if(u&&u.can){const w=await u.can("data.write");if(w===false)canWrite=false}}catch(e){}
  }
- db=useDb;
+ db=null;inClaude=!!(window.claude&&claude.use);
  if(db){
   let first=true;const timer=setTimeout(()=>{if(first)setSt("ยังเชื่อมต่อข้อมูลไม่ได้","warn")},10000);
   db.collection("reports").orderBy("date","desc").limit(400).onSnapshot(s=>{
@@ -580,7 +582,7 @@ async function boot(){
   },e=>{clearTimeout(timer);setSt("เชื่อมต่อข้อมูลไม่ได้","warn")});
  }else{list=await store.localList();renderList();openDate(todayISO())}
  if(!canWrite){setSt("ดูอย่างเดียว","warn")}
- if(!db&&location.protocol.startsWith("http")){$("#sendCard").style.display="";$("#navDrq").hidden=false}
+ if(!inClaude&&location.protocol.startsWith("http")){$("#navDrq").hidden=false}
 }
 boot();
 </script>
