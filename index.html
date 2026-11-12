@@ -516,24 +516,27 @@ function mailHtml(){
 $("#bSend").onclick=async()=>{
  if(!window.ExcelJS||!window.html2canvas||!window.jspdf){toast("โหลดไลบรารีไม่สำเร็จ");return}
  if(!has(R.reportNo)){toast("กรุณากรอกเลขที่รายงานก่อนส่ง");$("#fNo").focus();return}
- if(!await ask(`ส่งรายงานวันที่ ${be(R.date)} (No.${R.reportNo}) ทางอีเมล พร้อมไฟล์ PDF และ Excel?`))return;
+ if(!await ask(`${R.submittedAt?"ส่งฉบับแก้ไขของ":"ส่ง"}รายงานวันที่ ${be(R.date)} (No.${R.reportNo}) ทางอีเมล พร้อมไฟล์ PDF และ Excel?`))return;
  const b=$("#bSend");b.disabled=true;b.textContent="กำลังส่ง…";
  try{clearTimeout(saveT);await save();
   const tiers=[{pw:1100,q:.8,scale:1.6,pq:.85},{pw:800,q:.72,scale:1.3,pq:.78},{pw:600,q:.65,scale:1.1,pq:.7}];
   let body=null;
   for(const t of tiers){
    const [x,p]=await Promise.all([buildXlsx({pw:t.pw,q:t.q}),buildPdf({scale:t.scale,q:t.pq})]);
-   body={subject:`DRP SKY38 No.${R.reportNo} — ${be(R.date)}`,html:mailHtml(),
+   const rev=(R.sendCount||0)>0;
+   body={subject:`${rev?"[ฉบับแก้ไข "+(R.sendCount)+"] ":""}DRP SKY38 No.${R.reportNo} — ${be(R.date)}`,html:mailHtml(),
     attachments:[{filename:fname("pdf"),content:await blob64(p)},{filename:fname("xlsx"),content:await blob64(x)}]};
    if(JSON.stringify(body).length<4100000)break;body=null}
   if(!body)throw{msg:"ไฟล์ใหญ่เกินกว่าจะส่งทางอีเมล — ลองลดจำนวนภาพ"};
   const r=await fetch("/api/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
   if(!r.ok)throw{msg:j.error==="not_configured"?"ยังไม่ได้ตั้งค่าอีเมลบน Vercel (RESEND_API_KEY / MAIL_TO)":"ส่งไม่สำเร็จ"+(j.detail?": "+j.detail:"")};
-  R.submittedAt=new Date().toISOString();touch(true);showSent();toast("ส่งรายงานเรียบร้อย ✓",3500)}
+  R.submittedAt=new Date().toISOString();R.sendCount=(R.sendCount||0)+1;touch(true);showSent();toast("ส่งรายงานเรียบร้อย ✓",3500)}
  catch(e){console.error(e);toast(e&&e.msg?e.msg:"ส่งไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",5000)}
- finally{b.disabled=false;b.textContent="ส่งรายงาน (Submit)"}};
-function showSent(){const e=$("#sentInfo");if(!e)return;e.textContent=R&&R.submittedAt?`ส่งแล้วเมื่อ ${new Date(R.submittedAt).toLocaleString("th-TH")}`:""}
+ finally{b.disabled=false;showSent()}};
+function showSent(){const e=$("#sentInfo"),b=$("#bSend");if(!e)return;const sent=R&&R.submittedAt;
+ e.textContent=sent?`ส่งแล้ว ${R.sendCount||1} ครั้ง · ล่าสุด ${new Date(R.submittedAt).toLocaleString("th-TH")} — แก้ไขข้อมูลได้ แล้วกดส่งฉบับแก้ไข`:"";
+ if(b&&!b.disabled)b.textContent=sent?"ส่งฉบับแก้ไข (Re-submit)":"ส่งรายงาน (Submit)"}
 
 /* ---------- boot ---------- */
 async function boot(){
