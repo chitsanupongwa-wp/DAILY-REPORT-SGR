@@ -74,6 +74,8 @@ table.t td.x{width:28px;text-align:center}
 .slot .rm{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:6px;padding:2px 8px;cursor:pointer}
 .slot.busy .pic::after{content:"กำลังบันทึกภาพ…";position:absolute;inset:auto 0 0 0;background:rgba(15,110,140,.85);color:#fff;font-size:12px;padding:3px 8px}
 .pgsep{grid-column:1/-1;font-size:13px;font-weight:600;color:var(--acc);border-bottom:1px solid var(--line);padding:6px 0 4px;margin-top:4px}
+.sg{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px}
+.sgt{font-size:13px;font-weight:600}
 .hist{display:flex;align-items:center;gap:6px}
 .hist select{max-width:190px}
 /* ---------- print preview (A4 replica) ---------- */
@@ -162,14 +164,14 @@ table.t td.x{width:28px;text-align:center}
 
   <div class="two">
    <div class="card">
-    <h2>เครื่องจักรทำงาน <span class="sub">สะสม = ยกมา + วันนี้</span></h2>
-    <table class="t"><thead><tr><th>รายการ</th><th style="text-align:right">วันนี้</th><th style="text-align:right">ยกมา</th><th style="text-align:right">สะสม</th><th></th></tr></thead><tbody id="tbM"></tbody></table>
+    <h2>เครื่องจักรทำงาน</h2>
+    <table class="t"><thead><tr><th>รายการ</th><th style="text-align:right">วันนี้</th><th style="text-align:right">สะสม</th><th></th></tr></thead><tbody id="tbM"></tbody></table>
     <button class="btn add" data-add="machines">+ เพิ่มเครื่องจักร</button>
    </div>
    <div class="card">
-    <h2>ผู้ปฏิบัติงาน <span class="sub">สะสม = ยกมา + วันนี้</span></h2>
-    <table class="t"><thead><tr><th>ตำแหน่ง</th><th style="text-align:right">วันนี้</th><th style="text-align:right">ยกมา</th><th style="text-align:right">สะสม</th><th></th></tr></thead><tbody id="tbC"></tbody>
-     <tfoot><tr><td style="font-weight:600;padding-top:6px">รวม</td><td class="calc" id="sumToday"></td><td></td><td class="calc" id="sumCum"></td><td></td></tr></tfoot></table>
+    <h2>ผู้ปฏิบัติงาน</h2>
+    <table class="t"><thead><tr><th>ตำแหน่ง</th><th style="text-align:right">วันนี้</th><th style="text-align:right">สะสม</th><th></th></tr></thead><tbody id="tbC"></tbody>
+     <tfoot><tr><td style="font-weight:600;padding-top:6px">รวม</td><td class="calc" id="sumToday"></td><td class="calc" id="sumCum"></td><td></td></tr></tfoot></table>
     <button class="btn add" data-add="crew">+ เพิ่มตำแหน่ง</button>
    </div>
   </div>
@@ -189,12 +191,17 @@ table.t td.x{width:28px;text-align:center}
   </div>
 
   <div class="card">
-   <h2>ผู้ลงนาม <span class="sub">ตำแหน่งใต้เส้นลงชื่อ</span></h2>
+   <h2>ผู้ลงนาม <span class="sub">ชื่อบนเส้นลงชื่อ · ตำแหน่งใต้ชื่อ</span></h2>
    <div class="grid">
-    <label class="f">ตำแหน่ง 1 (Reported by)<input class="inp" data-k="sig.pos1" placeholder="ผู้ควบคุมงาน"></label>
-    <label class="f">ตำแหน่ง 2 (Reported by)<input class="inp" data-k="sig.pos2" placeholder="วิศวกรสนาม"></label>
-    <label class="f">ตำแหน่ง 3 (Checked by)<input class="inp" data-k="sig.pos3" placeholder="ผู้จัดการหน่วยงาน"></label>
+    <div class="sg"><div class="sgt">ผู้ลงนาม 1 · Reported by</div><label class="f">ชื่อ<input class="inp" data-k="sig.name1" placeholder="ชื่อ-นามสกุล"></label><label class="f">ตำแหน่ง<input class="inp" data-k="sig.pos1" placeholder="ผู้ควบคุมงาน"></label></div>
+    <div class="sg"><div class="sgt">ผู้ลงนาม 2 · Reported by</div><label class="f">ชื่อ<input class="inp" data-k="sig.name2" placeholder="ชื่อ-นามสกุล"></label><label class="f">ตำแหน่ง<input class="inp" data-k="sig.pos2" placeholder="วิศวกรสนาม"></label></div>
+    <div class="sg"><div class="sgt">ผู้ลงนาม 3 · Checked by</div><label class="f">ชื่อ<input class="inp" data-k="sig.name3" placeholder="ชื่อ-นามสกุล"></label><label class="f">ตำแหน่ง<input class="inp" data-k="sig.pos3" placeholder="ผู้จัดการหน่วยงาน"></label></div>
    </div>
+  </div>
+  <div class="card" id="sendCard" style="display:none;text-align:center">
+   <button class="btn pri" id="bSend" style="font-size:16px;padding:10px 26px">ส่งรายงาน (Submit)</button>
+   <p class="hint" id="sentInfo"></p>
+   <p class="hint">ส่งทางอีเมลพร้อมแนบไฟล์ PDF และ Excel</p>
   </div>
   <p class="hint" style="text-align:center;margin-bottom:30px">บันทึกอัตโนมัติขณะพิมพ์ · รายงานวันใหม่จะดึงรายชื่อ, ยอดสะสม และงานจากรายงานล่าสุดมาให้</p>
  </section>
@@ -251,18 +258,18 @@ let list=[];           // saved reports (summary)
 let writeChain=Promise.resolve(),dirty=false,saveT=null;
 
 function blank(date){return{date,reportNo:"",projectNo:"",writtenDate:date,time:"10:00-18:00",
- machines:DEF_M.map(n=>({name:n,today:"",base:""})),crew:DEF_C.map(n=>({name:n,today:"",base:""})),
+ machines:DEF_M.map(n=>({name:n,today:"",cum:""})),crew:DEF_C.map(n=>({name:n,today:"",cum:""})),
  works:[{task:"",area:"",today:"",prev:"",unit:"%",detail:""},{task:"",area:"",today:"",prev:"",unit:"%",detail:""},{task:"",area:"",today:"",prev:"",unit:"%",detail:""}],
- sig:{pos1:"ผู้ควบคุมงาน",pos2:"วิศวกรสนาม",pos3:"ผู้จัดการหน่วยงาน"},photos:Array.from({length:6},()=>({pid:"",cap:""}))}}
-const cumOf=r=>(has(r.today)||has(r.base))?num(r.base)+num(r.today):"";
+ sig:{name1:"",name2:"",name3:"",pos1:"ผู้ควบคุมงาน",pos2:"วิศวกรสนาม",pos3:"ผู้จัดการหน่วยงาน"},photos:Array.from({length:6},()=>({pid:"",cap:""}))}}
+const cumOf=r=>r.cum!==undefined?(has(r.cum)?num(r.cum):""):((has(r.today)||has(r.base))?num(r.base)+num(r.today):"");
 const totOf=w=>(has(w.today)||has(w.prev))?num(w.prev)+num(w.today):"";
 
 function seedFrom(prev,date){
  const r=blank(date);if(!prev)return r;
  const n=parseInt(prev.reportNo,10);if(isFinite(n))r.reportNo=String(n+1).padStart(String(prev.reportNo).length,"0");
  r.projectNo=prev.projectNo||"";r.time=prev.time||r.time;r.sig={...r.sig,...(prev.sig||{})};
- r.machines=(prev.machines||[]).map(m=>({name:m.name,today:"",base:fmtRaw(cumOf(m))}));
- r.crew=(prev.crew||[]).filter(m=>m.name!=="ยาม").map(m=>({name:m.name,today:"",base:fmtRaw(cumOf(m))}));
+ r.machines=(prev.machines||[]).filter(m=>has(m.name)).map(m=>({name:m.name,today:"",cum:"",hint:fmtRaw(cumOf(m))}));
+ r.crew=(prev.crew||[]).filter(m=>m.name!=="ยาม").map(m=>({name:m.name,today:"",cum:"",hint:fmtRaw(cumOf(m))}));
  const ws=(prev.works||[]).filter(w=>has(w.task)||has(w.area));
  if(ws.length)r.works=ws.map(w=>({task:w.task,area:w.area,today:"",prev:fmtRaw(totOf(w)),unit:w.unit||"%",detail:""}));
  return r}
@@ -281,15 +288,15 @@ function rowsHTML(kind){
   <td class="w-detail" data-l="รายละเอียด"><input class="inp" data-f="detail" value="${esc(w.detail)}"></td>
   <td class="x"><button class="xbtn" data-del title="ลบ">×</button></td></tr>`).join("");
  return a.map((m,i)=>`<tr data-i="${i}">
-  <td><input class="inp" data-f="name" value="${esc(m.name)}"></td>
+  <td><input class="inp" data-f="name" value="${esc(m.name)}" placeholder="${kind==="machines"?"ชื่อเครื่องจักร":"ตำแหน่ง"}"></td>
   <td class="n"><input class="inp" data-f="today" inputmode="decimal" value="${esc(m.today)}"></td>
-  <td class="n"><input class="inp" data-f="base" inputmode="decimal" value="${esc(m.base)}" style="color:var(--mute)"></td>
-  <td class="calc" data-c>${fmt(cumOf(m))}</td>
+  <td class="n"><input class="inp" data-f="cum" inputmode="decimal" value="${esc(m.cum!==undefined?m.cum:fmtRaw(cumOf(m)))}"${has(m.hint)?` placeholder="เดิม ${esc(m.hint)}"`:""}></td>
   <td class="x"><button class="xbtn" data-del title="ลบ">×</button></td></tr>`).join("")}
 const TB={machines:"#tbM",crew:"#tbC",works:"#tbW"};
 function renderRows(kind){$(TB[kind]).innerHTML=rowsHTML(kind);document.querySelector(`[data-add="${kind}"]`).disabled=R[kind].length>=MAX[kind];if(kind==="crew")sums()}
 function sums(){let t=0,c=0,any=false;R.crew.forEach(m=>{t+=num(m.today);const v=cumOf(m);if(v!=="")c+=v;if(has(m.today))any=true});$("#sumToday").textContent=fmt(t);$("#sumCum").textContent=fmt(c)}
 function renderAll(){
+ try{showSent()}catch(e){}
  document.querySelectorAll("[data-k]").forEach(el=>{el.value=el.dataset.k.split(".").reduce((o,k)=>o?.[k],R)??""});
  $("#fDate").value=be(R.date);$("#dpick").value=R.date;
  ["machines","crew","works"].forEach(renderRows);renderPhotos();
@@ -301,7 +308,7 @@ for(const kind of ["machines","crew","works"]){
  tb.addEventListener("click",async e=>{if(!e.target.closest("[data-del]"))return;const i=+e.target.closest("tr").dataset.i;R[kind].splice(i,1);renderRows(kind);touch()});
 }
 document.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{const k=b.dataset.add;if(R[k].length>=MAX[k])return;
- R[k].push(k==="works"?{task:"",area:"",today:"",prev:"",unit:"%",detail:""}:{name:"",today:"",base:""});renderRows(k);
+ R[k].push(k==="works"?{task:"",area:"",today:"",prev:"",unit:"%",detail:""}:{name:"",today:"",cum:""});renderRows(k);
  const tr=$(TB[k]).lastElementChild;tr&&tr.querySelector("input").focus();touch()});
 document.querySelectorAll("[data-k]").forEach(el=>el.addEventListener("input",()=>{const ks=el.dataset.k.split(".");let o=R;while(ks.length>1){const k=ks.shift();o=o[k]??(o[k]={})}o[ks[0]]=el.value;touch()}));
 
@@ -378,7 +385,9 @@ async function openDate(d){
   setSt(prev?`ใหม่ · ดึงยอดจาก ${be(prev.date)}`:"รายงานใหม่");return}
  const b=blank(d);r={...b,...r,sig:{...b.sig,...(r.sig||{})}};
  while(r.photos.length<6)r.photos.push({pid:"",cap:""});
- r.crew=(r.crew||[]).filter(m=>!(m.name==="ยาม"&&!has(m.today)&&!has(m.base)));
+ if(!(r.machines||[]).length)r.machines=b.machines;
+ ["machines","crew"].forEach(k=>{r[k]=(r[k]||[]).map(m=>m.cum!==undefined?m:{name:m.name,today:m.today,cum:fmtRaw(cumOf(m))})});
+ r.crew=(r.crew||[]).filter(m=>!(m.name==="ยาม"&&!has(m.today)&&!has(m.base)&&!has(m.cum)));
  R=r;renderAll();renderList();setSt(db?"บันทึกแล้ว ✓":"บันทึกในเครื่องนี้ ✓","ok");
  for(const p of R.photos)if(p.pid&&!photoData[p.pid]){store.getPhoto(p.pid).then(v=>{if(v){photoData[p.pid]=v;if(R.photos.some(x=>x.pid===p.pid))renderPhotos()}}).catch(()=>{})}
 }
@@ -401,9 +410,9 @@ function page1(){
  <table><thead><tr><th style="width:17%">งาน</th><th style="width:11%">พื้นที่</th><th style="width:7%">วันนี้</th><th style="width:8%">วันก่อนๆ</th><th style="width:9%">รวมทั้งสิ้น</th><th style="width:8%">หน่วย (%)</th><th>รายละเอียดการดำเนินการ</th></tr></thead>
  <tbody>${wRows.map(w=>`<tr><td>${esc(w.task)}</td><td>${esc(w.area)}</td><td class="c">${esc(w.today)}</td><td class="c">${esc(w.prev)}</td><td class="c">${w.task||w.area?fmt(totOf(w)):""}</td><td class="c">${w.task||w.area?esc(w.unit):""}</td><td>${esc(w.detail)}</td></tr>`).join("")}</tbody></table></div>
  <div class="sig"><div>Reported by : CORAL LIFE
-   <div class="ln" style="left:6%;width:40%"><i></i><span>${esc(R.sig.pos1)}</span></div>
-   <div class="ln" style="left:54%;width:42%"><i></i><span>${esc(R.sig.pos2)}</span></div></div>
-  <div>Checked by : ONE-M<div class="ln" style="left:12%;width:76%"><i></i><span>${esc(R.sig.pos3)}</span></div></div></div>
+   <div class="ln" style="left:6%;width:40%"><i>${esc(R.sig.name1)}</i><span>${esc(R.sig.pos1)}</span></div>
+   <div class="ln" style="left:54%;width:42%"><i>${esc(R.sig.name2)}</i><span>${esc(R.sig.pos2)}</span></div></div>
+  <div>Checked by : ONE-M<div class="ln" style="left:12%;width:76%"><i>${esc(R.sig.name3)}</i><span>${esc(R.sig.pos3)}</span></div></div></div>
  <div class="formno">FORM S-02</div></div>`}
 function page2(ph){
  return `<div class="page p2"><div class="hd"><div class="r1"></div><div class="r2">PROJECT NAME : Sky Ground Residence 38</div>
@@ -425,8 +434,8 @@ async function saveFile(name,blob){
  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
 const fname=ext=>`DRP_SKY38_${(R.reportNo||"").replace(/[^\w-]/g,"")||"x"}_${R.date}.${ext}`;
 const b64buf=b=>{const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer};
-function letterbox(src,ar){return new Promise(ok=>{const im=new Image();im.onload=()=>{const W=1400,H=Math.round(W/ar);const c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,W,H);
- const s=Math.min(W/im.naturalWidth,H/im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;g.drawImage(im,(W-w)/2,(H-h)/2,w,h);ok(c.toDataURL("image/jpeg",.85).split(",")[1])};im.src=src})}
+function letterbox(src,ar,PW=1400,Q=.85){return new Promise(ok=>{const im=new Image();im.onload=()=>{const W=PW,H=Math.round(W/ar);const c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,W,H);
+ const s=Math.min(W/im.naturalWidth,H/im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;g.drawImage(im,(W-w)/2,(H-h)/2,w,h);ok(c.toDataURL("image/jpeg",Q).split(",")[1])};im.src=src})}
 async function ensurePhotos(){await Promise.all(R.photos.filter(p=>p.pid&&!photoData[p.pid]).map(p=>store.getPhoto(p.pid).then(v=>{if(v)photoData[p.pid]=v}).catch(()=>{})))}
 function cloneSheet(wb,src,name){
  const cp=o=>JSON.parse(JSON.stringify(o||{}));
@@ -438,10 +447,8 @@ function cloneSheet(wb,src,name){
  return d}
 const val=v=>{if(!has(v))return null;const n=Number(String(v).replace(/,/g,""));return isFinite(n)?n:String(v)};
 
-$("#bXlsx").onclick=async()=>{
- if(!window.ExcelJS){toast("โหลดไลบรารี Excel ไม่สำเร็จ");return}
- const b=$("#bXlsx");b.disabled=true;b.textContent="กำลังสร้าง…";
- try{await ensurePhotos();
+async function buildXlsx(o={}){
+  await ensurePhotos();
   const wb=new ExcelJS.Workbook();await wb.xlsx.load(b64buf(TEMPLATE_B64));
   const ws=wb.getWorksheet("DRP");
   ws.getCell("A1").value=null;
@@ -449,13 +456,14 @@ $("#bXlsx").onclick=async()=>{
   ws.getCell("R3").value=R.projectNo||null;
   ws.getCell("R7").value=PREFIX+(R.reportNo||"");
   ws.getCell("R9").value=be(R.date);ws.getCell("W9").value=R.time||null;
-  R.machines.slice(0,20).forEach((m,i)=>{const r=14+i;ws.getCell("A"+r).value=m.name||null;ws.getCell("F"+r).value=val(m.today);const c=cumOf(m);ws.getCell("I"+r).value=c===""?null:c});
   for(let r=14;r<=33;r++){["A","F","I","N","R","U"].forEach(c=>{ws.getCell(c+r).value=null})}
+  R.machines.slice(0,20).forEach((m,i)=>{const r=14+i;ws.getCell("A"+r).value=m.name||null;ws.getCell("F"+r).value=val(m.today);const c=cumOf(m);ws.getCell("I"+r).value=c===""?null:c});
   R.crew.slice(0,20).forEach((m,i)=>{const r=14+i;ws.getCell("N"+r).value=m.name||null;ws.getCell("R"+r).value=val(m.today);const c=cumOf(m);ws.getCell("U"+r).value=c===""?null:c});
   R.works.slice(0,10).forEach((w,i)=>{const r=37+i,t=totOf(w),on=has(w.task)||has(w.area);
    ws.getCell("A"+r).value=w.task||null;ws.getCell("F"+r).value=w.area||null;ws.getCell("I"+r).value=val(w.today);ws.getCell("K"+r).value=val(w.prev);
    try{ws.unMergeCells("M"+r)}catch(e){}try{ws.mergeCells(`M${r}:O${r}`)}catch(e){}const mc=ws.getCell("M"+r);mc.value=t===""?null:t;mc.alignment={horizontal:"center",vertical:"middle"};mc.font={...(ws.getCell("I"+r).font||{})};ws.getCell("P"+r).value=on?(w.unit||null):null;try{ws.mergeCells(`R${r}:X${r}`)}catch(e){}const dc=ws.getCell("R"+r);dc.value=w.detail||null;dc.alignment={horizontal:"left",vertical:"middle",shrinkToFit:true}});
   [["A51",R.sig.pos1],["H51",R.sig.pos2],["Q51",R.sig.pos3]].forEach(([a,v])=>{ws.getCell(a).value=has(v)?v:null});
+  [["A50:F50",R.sig.name1],["H50:N50",R.sig.name2],["Q50:W50",R.sig.name3]].forEach(([rg,v])=>{if(!has(v))return;try{ws.mergeCells(rg)}catch(e){}const c=ws.getCell(rg.split(":")[0]);c.value=v;c.alignment={horizontal:"center",vertical:"bottom"};c.font={...(ws.getCell(rg.split(":")[0].replace("50","51")).font||{}),bold:false}});
   const p=wb.getWorksheet("ภาพประกอบ DRP");
   p.getCell("H3").value="  เลขที่ "+PREFIX+(R.reportNo||"");p.getCell("H4").value="  วันที่เขียน : "+be(R.writtenDate);p.getCell("H5").value="  ทำงานวันที่ : "+be(R.date);
   const SL=[[0,11,"A24"],[5,11,"F24"],[0,25,"A38"],[5,25,"F38"],[0,39,"A52"],[5,39,"F52"]];
@@ -465,23 +473,61 @@ $("#bXlsx").onclick=async()=>{
   for(let i=0;i<6;i++){const ph=chunks[k][i],[c0,r0,capCell]=SL[i];
    if(ph.cap){const c=p.getCell(capCell);c.value=ph.cap;c.font={...(c.font||{}),size:14};c.alignment={horizontal:"left",vertical:"middle"}}
    const src=ph.pid&&photoData[ph.pid];if(!src)continue;
-   const[W,H]=SLOT_PX[i%2];const b64=await letterbox(src,W/H);const id=wb.addImage({base64:b64,extension:"jpeg"});
+   const[W,H]=SLOT_PX[i%2];const b64=await letterbox(src,W/H,o.pw||1400,o.q||.85);const id=wb.addImage({base64:b64,extension:"jpeg"});
    p.addImage(id,{tl:{col:c0+.04,row:r0+.12},ext:{width:W,height:H},editAs:"oneCell"})}}
   const buf=await wb.xlsx.writeBuffer();
-  await saveFile(fname("xlsx"),new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}))}
+  return new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})}
+$("#bXlsx").onclick=async()=>{
+ if(!window.ExcelJS){toast("โหลดไลบรารี Excel ไม่สำเร็จ");return}
+ const b=$("#bXlsx");b.disabled=true;b.textContent="กำลังสร้าง…";
+ try{await saveFile(fname("xlsx"),await buildXlsx())}
  catch(e){console.error(e);toast("สร้างไฟล์ Excel ไม่สำเร็จ",4000)}
  finally{b.disabled=false;b.textContent="⬇ Excel"}};
 
+async function buildPdf(o={}){
+  await ensurePhotos();await document.fonts.ready;const cap=$("#capture");renderPreview(cap);
+  await Promise.all([...cap.querySelectorAll("img")].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));
+  const pdf=new jspdf.jsPDF({unit:"mm",format:"a4"});const pages=cap.querySelectorAll(".page");
+  for(let i=0;i<pages.length;i++){pages[i].style.boxShadow="none";const c=await html2canvas(pages[i],{scale:o.scale||2,backgroundColor:"#fff",logging:false});if(i)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",o.q||.92),"JPEG",0,0,210,297)}
+  cap.innerHTML="";return pdf.output("blob")}
 $("#bPdf").onclick=async()=>{
  if(!window.html2canvas||!window.jspdf){toast("โหลดไลบรารี PDF ไม่สำเร็จ");return}
  const b=$("#bPdf");b.disabled=true;b.textContent="กำลังสร้าง…";
- try{await ensurePhotos();await document.fonts.ready;const cap=$("#capture");renderPreview(cap);
-  await Promise.all([...cap.querySelectorAll("img")].map(im=>im.complete?0:new Promise(r=>{im.onload=im.onerror=r})));
-  const pdf=new jspdf.jsPDF({unit:"mm",format:"a4"});const pages=cap.querySelectorAll(".page");
-  for(let i=0;i<pages.length;i++){pages[i].style.boxShadow="none";const c=await html2canvas(pages[i],{scale:2,backgroundColor:"#fff",logging:false});if(i)pdf.addPage();pdf.addImage(c.toDataURL("image/jpeg",.92),"JPEG",0,0,210,297)}
-  cap.innerHTML="";await saveFile(fname("pdf"),pdf.output("blob"))}
+ try{await saveFile(fname("pdf"),await buildPdf())}
  catch(e){console.error(e);toast("สร้าง PDF ไม่สำเร็จ",4000)}
  finally{b.disabled=false;b.textContent="⬇ PDF"}};
+
+/* ---------- submit (email via /api/send on the hosted version) ---------- */
+const blob64=b=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(",")[1]);r.onerror=no;r.readAsDataURL(b)});
+function mailHtml(){
+ const crew=R.crew.filter(m=>has(m.today)).map(m=>`${esc(m.name)} ${esc(m.today)}`).join(", ")||"-";
+ const tot=R.crew.reduce((a,m)=>a+num(m.today),0);
+ const works=R.works.filter(w=>has(w.task)||has(w.detail)).map(w=>`<li>${esc(w.task)}${w.area?" · "+esc(w.area):""} — วันนี้ ${esc(w.today||0)} / รวม ${fmt(totOf(w))} ${esc(w.unit)}${w.detail?"<br><small>"+esc(w.detail)+"</small>":""}</li>`).join("")||"<li>-</li>";
+ return `<div style="font-family:Sarabun,Arial,sans-serif;font-size:14px"><h3 style="margin:0 0 6px">Daily Construction Report — SKY GROUND RESIDENCE38</h3>
+ <p>เลขที่ ${PREFIX}${esc(R.reportNo)}<br>วันที่ทำงาน ${be(R.date)} · เวลา ${esc(R.time)}</p>
+ <p><b>ผู้ปฏิบัติงานวันนี้ (${fmt(tot)} คน):</b> ${crew}</p><p><b>ผลการดำเนินงาน</b></p><ul>${works}</ul>
+ <p>ภาพประกอบ ${R.photos.filter(p=>p.pid).length} ภาพ · ไฟล์ PDF และ Excel แนบมาด้วย</p></div>`}
+$("#bSend").onclick=async()=>{
+ if(!window.ExcelJS||!window.html2canvas||!window.jspdf){toast("โหลดไลบรารีไม่สำเร็จ");return}
+ if(!has(R.reportNo)){toast("กรุณากรอกเลขที่รายงานก่อนส่ง");$("#fNo").focus();return}
+ if(!await ask(`ส่งรายงานวันที่ ${be(R.date)} (No.${R.reportNo}) ทางอีเมล พร้อมไฟล์ PDF และ Excel?`))return;
+ const b=$("#bSend");b.disabled=true;b.textContent="กำลังส่ง…";
+ try{clearTimeout(saveT);await save();
+  const tiers=[{pw:1100,q:.8,scale:1.6,pq:.85},{pw:800,q:.72,scale:1.3,pq:.78},{pw:600,q:.65,scale:1.1,pq:.7}];
+  let body=null;
+  for(const t of tiers){
+   const [x,p]=await Promise.all([buildXlsx({pw:t.pw,q:t.q}),buildPdf({scale:t.scale,q:t.pq})]);
+   body={subject:`DRP SKY38 No.${R.reportNo} — ${be(R.date)}`,html:mailHtml(),
+    attachments:[{filename:fname("pdf"),content:await blob64(p)},{filename:fname("xlsx"),content:await blob64(x)}]};
+   if(JSON.stringify(body).length<4100000)break;body=null}
+  if(!body)throw{msg:"ไฟล์ใหญ่เกินกว่าจะส่งทางอีเมล — ลองลดจำนวนภาพ"};
+  const r=await fetch("/api/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw{msg:j.error==="not_configured"?"ยังไม่ได้ตั้งค่าอีเมลบน Vercel (RESEND_API_KEY / MAIL_TO)":"ส่งไม่สำเร็จ"+(j.detail?": "+j.detail:"")};
+  R.submittedAt=new Date().toISOString();touch(true);showSent();toast("ส่งรายงานเรียบร้อย ✓",3500)}
+ catch(e){console.error(e);toast(e&&e.msg?e.msg:"ส่งไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",5000)}
+ finally{b.disabled=false;b.textContent="ส่งรายงาน (Submit)"}};
+function showSent(){const e=$("#sentInfo");if(!e)return;e.textContent=R&&R.submittedAt?`ส่งแล้วเมื่อ ${new Date(R.submittedAt).toLocaleString("th-TH")}`:""}
 
 /* ---------- boot ---------- */
 async function boot(){
@@ -501,6 +547,7 @@ async function boot(){
   },e=>{clearTimeout(timer);setSt("เชื่อมต่อข้อมูลไม่ได้","warn")});
  }else{list=await store.localList();renderList();openDate(todayISO())}
  if(!canWrite){setSt("ดูอย่างเดียว","warn")}
+ if(!db&&location.protocol.startsWith("http"))$("#sendCard").style.display="";
 }
 boot();
 </script>
