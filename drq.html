@@ -30,7 +30,12 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tabs{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;gap:4px;align-items:center}
 .tab{border:0;background:none;padding:8px 14px;border-bottom:2px solid transparent;cursor:pointer;color:var(--mute)}
 .tab.on{color:var(--acc);border-color:var(--acc);font-weight:600}
-.nav{margin-left:auto;font-size:13.5px;color:var(--acc);text-decoration:none;padding:6px 10px;border:1px solid var(--line);border-radius:8px}
+.sw{margin-left:auto;display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;font-size:13.5px}
+.sw a{padding:6px 12px;text-decoration:none;color:var(--acc);background:#fff;white-space:nowrap}
+.sw a+a{border-left:1px solid var(--line)}
+.sw a.cur{background:var(--acc);color:#fff;font-weight:600;pointer-events:none}
+.tab{white-space:nowrap}
+@media(max-width:600px){.tabs{flex-wrap:wrap}.sw{order:-1;width:100%;margin:6px 0 2px}.sw a{flex:1;text-align:center}}
 main{max-width:1100px;margin:0 auto;padding:16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
 .card h2{font-size:16px;margin:0 0 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -158,7 +163,7 @@ table.t td.x{width:28px;text-align:center}
   <button class="btn" id="bXlsx">⬇ ดาวน์โหลด Excel</button>
   <button class="btn pri" id="bPdf">⬇ ดาวน์โหลด PDF</button>
  </div>
- <div class="tabs"><button class="tab on" data-t="form">กรอกข้อมูล</button><button class="tab" data-t="pv">Preview Report</button></div>
+ <div class="tabs"><button class="tab on" data-t="form">กรอกข้อมูล</button><button class="tab" data-t="pv">Preview Report</button><nav class="sw" id="sw" hidden><a href="index.html">Daily Report</a><a href="drq.html" class="cur">Daily Request</a></nav></div>
 </div>
 
 <main>
@@ -214,9 +219,9 @@ table.t td.x{width:28px;text-align:center}
    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn" id="bXlsx2" style="font-size:15px;padding:9px 20px">⬇ ดาวน์โหลด Excel</button><button class="btn" id="bPdf2" style="font-size:15px;padding:9px 20px">⬇ ดาวน์โหลด PDF</button></div>
   </div>
   <div class="card" id="sendCard" style="text-align:center">
-   <button class="btn" id="bSend" style="font-size:16px;padding:10px 26px;background:#16a34a;border-color:#16a34a;color:#fff;font-weight:600">บันทึกและส่งอีเมล (Submit)</button>
+   <button class="btn" id="bSend" style="font-size:16px;padding:10px 26px;background:#16a34a;border-color:#16a34a;color:#fff;font-weight:600">บันทึก (Submit)</button>
    <p class="hint" id="sentInfo"></p>
-   <p class="hint">ส่งทางอีเมลพร้อมแนบไฟล์ PDF และ Excel · แก้ไขแล้วส่งซ้ำได้</p>
+   <p class="hint">กดบันทึกแล้ว ข้อมูลพร้อมไฟล์ PDF และ Excel จะส่งไปที่อีเมลให้อัตโนมัติ</p>
   </div>
   <div style="height:24px"></div>
  </section>
@@ -483,11 +488,11 @@ function mailHtml(){
  <p><b>หมวดงาน:</b> ${esc(cats.join(", ")||"-")}</p><p><b>รายละเอียดงาน</b></p><ol>${items}</ol>
  <p>รูป Plan ${R.pages.length} หน้า${floors.length?" (ชั้น "+esc(floors.join(", "))+")":""} · ไฟล์ PDF และ Excel แนบมาด้วย</p></div>`}
 $("#bSend").onclick=async()=>{
- if(inClaude||!location.protocol.startsWith("http")){toast("การส่งอีเมลใช้ได้บนเว็บ drq-sgr.vercel.app",5000);return}
+ if(inClaude||!location.protocol.startsWith("http")){toast("การส่งอีเมลใช้ได้บนเว็บ drp-sgr.vercel.app/drq.html",5000);return}
  if(!window.ExcelJS||!window.html2canvas||!window.jspdf){toast("โหลดไลบรารีไม่สำเร็จ");return}
  if(!has(R.reqNo)){toast("กรุณากรอกเลขที่ DRQ ก่อนส่ง");$("#fNo").focus();return}
- if(!await ask(`${R.submittedAt?"ส่งฉบับแก้ไขของ":"ส่ง"}ใบขอวันที่ ${be(R.date)} (No.${R.reqNo}) ทางอีเมล พร้อมไฟล์ PDF และ Excel?`))return;
- const b=$("#bSend");b.disabled=true;b.textContent="กำลังส่ง…";
+ if(!await ask(`${R.submittedAt?"บันทึกฉบับแก้ไขของ":"บันทึก"}ใบขอวันที่ ${be(R.date)} (No.${R.reqNo})?`))return;
+ const b=$("#bSend");b.disabled=true;b.textContent="กำลังบันทึก…";
  try{clearTimeout(saveT);await save();
   const tiers=[{pw:1400,q:.8,scale:1.6,pq:.85},{pw:1000,q:.72,scale:1.3,pq:.78},{pw:700,q:.65,scale:1.1,pq:.7}];let body=null;
   for(const t of tiers){const[x,p]=await Promise.all([buildXlsx({pw:t.pw,q:t.q}),buildPdf({scale:t.scale,q:t.pq})]);const rev=(R.sendCount||0)>0;
@@ -496,15 +501,16 @@ $("#bSend").onclick=async()=>{
   if(!body)throw{msg:"ไฟล์ใหญ่เกินกว่าจะส่งทางอีเมล — ลองลดจำนวนรูป"};
   const r=await fetch("/api/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));
   if(!r.ok)throw{msg:j.error==="not_configured"?"ยังไม่ได้ตั้งค่าอีเมลบน Vercel (RESEND_API_KEY / MAIL_TO)":r.status===404?"ไม่พบระบบส่งอีเมลบนเว็บนี้ (ต้องมีไฟล์ api/send.js ใน repo)":"ส่งไม่สำเร็จ (HTTP "+r.status+")"+(j.detail?": "+j.detail:"")};
-  R.submittedAt=new Date().toISOString();R.sendCount=(R.sendCount||0)+1;touch(true);toast("ส่งใบขอเรียบร้อย ✓",3500)}
+  R.submittedAt=new Date().toISOString();R.sendCount=(R.sendCount||0)+1;touch(true);toast("บันทึกเรียบร้อย ✓",3500)}
  catch(e){console.error(e);toast(e&&e.msg?e.msg:"ส่งไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",5000)}
  finally{b.disabled=false;showSent()}};
 function showSent(){const e=$("#sentInfo"),b=$("#bSend");if(!e||!R)return;const s=R.submittedAt;
- e.textContent=s?`ส่งแล้ว ${R.sendCount||1} ครั้ง · ล่าสุด ${new Date(s).toLocaleString("th-TH")} — แก้ไขแล้วกดส่งซ้ำได้`:"";
- if(b&&!b.disabled)b.textContent=s?"บันทึกและส่งอีเมลฉบับแก้ไข (Submit)":"บันทึกและส่งอีเมล (Submit)"}
+ e.textContent=s?`บันทึกแล้ว ${R.sendCount||1} ครั้ง · ล่าสุด ${new Date(s).toLocaleString("th-TH")} — แก้ไขแล้วกดบันทึกซ้ำได้`:"";
+ if(b&&!b.disabled)b.textContent=s?"บันทึกฉบับแก้ไข (Submit)":"บันทึก (Submit)"}
 
 $("#bXlsx2").onclick=()=>$("#bXlsx").click();$("#bPdf2").onclick=()=>$("#bPdf").click();
 /* ---------- boot ---------- */
+if(!(window.claude&&window.claude.use)&&location.protocol.startsWith("http"))document.getElementById("sw").hidden=false;
 async function boot(){
  const start=addDays(todayISO(),1);R=blank(start);renderAll();setSt("กำลังเชื่อมต่อ…");
  let useDb=null;
