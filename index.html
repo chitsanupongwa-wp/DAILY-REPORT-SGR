@@ -220,6 +220,7 @@ table.t td.x{width:28px;text-align:center}
   <div class="card" id="sendCard" style="text-align:center">
    <button class="btn" id="bSend" style="font-size:16px;padding:10px 26px;background:#16a34a;border-color:#16a34a;color:#fff;font-weight:600">บันทึก (Submit)</button>
    <p class="hint" id="sentInfo"></p>
+   <button class="btn" id="bSharePdf" hidden style="font-size:15px;padding:9px 22px;margin-top:6px;background:#06c755;border-color:#06c755;color:#fff;font-weight:600">📤 แชร์ PDF ที่บันทึก (LINE)</button>
    <p class="hint">กดบันทึกแล้ว ข้อมูลพร้อมไฟล์ PDF และ Excel จะส่งไปที่อีเมลให้อัตโนมัติ</p>
   </div>
   <div style="height:24px"></div>
@@ -410,7 +411,7 @@ function renderList(){list.sort((a,b)=>b.date.localeCompare(a.date));const cur=R
 $("#hsel").onchange=e=>{if(e.target.value)openDate(e.target.value)};
 $("#dpick").onchange=e=>{if(e.target.value)openDate(e.target.value)};
 
-async function openDate(d){
+async function openDate(d){sharedPdf=null;$("#bSharePdf").hidden=true;
  if(dirty){clearTimeout(saveT);await save()}
  setSt("กำลังโหลด…");
  let r=null;try{r=await store.getReport(d)}catch(e){}
@@ -554,7 +555,7 @@ $("#bSend").onclick=async()=>{
   const tiers=[{pw:1100,q:.8,scale:1.6,pq:.85},{pw:800,q:.72,scale:1.3,pq:.78},{pw:600,q:.65,scale:1.1,pq:.7}];
   let body=null;
   for(const t of tiers){
-   const [x,p]=await Promise.all([buildXlsx({pw:t.pw,q:t.q}),buildPdf({scale:t.scale,q:t.pq})]);
+   const [x,p]=await Promise.all([buildXlsx({pw:t.pw,q:t.q}),buildPdf({scale:t.scale,q:t.pq})]);lastPdf=p;
    const rev=(R.sendCount||0)>0;
    body={subject:`${rev?"[ฉบับแก้ไข "+(R.sendCount)+"] ":""}DRP SKY38 No.${R.reportNo} — ${be(R.date)}`,html:mailHtml(),
     attachments:[{filename:fname("pdf"),content:await blob64(p)},{filename:fname("xlsx"),content:await blob64(x)}]};
@@ -563,7 +564,7 @@ $("#bSend").onclick=async()=>{
   const r=await fetch("/api/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
   const j=await r.json().catch(()=>({}));
   if(!r.ok)throw{msg:j.error==="not_configured"?"ยังไม่ได้ตั้งค่าอีเมลบน Vercel (RESEND_API_KEY / MAIL_TO)":r.status===404?"ไม่พบระบบส่งอีเมลบนเว็บนี้ (ต้องมีไฟล์ api/send.js ใน repo)":"ส่งไม่สำเร็จ (HTTP "+r.status+")"+(j.detail?": "+j.detail:"")};
-  R.submittedAt=new Date().toISOString();R.sendCount=(R.sendCount||0)+1;touch(true);showSent();toast(j.driveUrl?"บันทึกเรียบร้อย ✓ ส่งอีเมลและเก็บใน Google Drive แล้ว":j.driveNote?"ส่งอีเมลแล้ว ✓ แต่เก็บ Google Drive ไม่สำเร็จ ("+j.driveNote+")":"บันทึกเรียบร้อย ✓",j.driveNote?6000:3500)}
+  R.submittedAt=new Date().toISOString();R.sendCount=(R.sendCount||0)+1;sharedPdf=lastPdf?new File([lastPdf],fname("pdf"),{type:"application/pdf"}):null;$("#bSharePdf").hidden=!sharedPdf;touch(true);showSent();toast(j.driveUrl?"บันทึกเรียบร้อย ✓ ส่งอีเมลและเก็บใน Google Drive แล้ว":j.driveNote?"ส่งอีเมลแล้ว ✓ แต่เก็บ Google Drive ไม่สำเร็จ ("+j.driveNote+")":"บันทึกเรียบร้อย ✓",j.driveNote?6000:3500)}
  catch(e){console.error(e);toast(e&&e.msg?e.msg:"ส่งไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่",5000)}
  finally{b.disabled=false;showSent()}};
 function showSent(){const e=$("#sentInfo"),b=$("#bSend");if(!e)return;const sent=R&&R.submittedAt;
@@ -572,6 +573,11 @@ function showSent(){const e=$("#sentInfo"),b=$("#bSend");if(!e)return;const sent
 
 $("#bXlsx2").onclick=()=>$("#bXlsx").click();$("#bPdf2").onclick=()=>$("#bPdf").click();
 /* ---------- share (LINE / mobile share sheet) ---------- */
+let lastPdf=null,sharedPdf=null;
+$("#bSharePdf").onclick=async()=>{if(!sharedPdf)return;
+ try{if(navigator.canShare&&navigator.canShare({files:[sharedPdf]})){await navigator.share({files:[sharedPdf],title:sharedPdf.name});return}}
+ catch(e){if(e&&e.name==="AbortError")return}
+ await saveFile(sharedPdf.name,sharedPdf);toast("อุปกรณ์นี้แชร์ไฟล์ไม่ได้ — ดาวน์โหลด PDF แล้ว แนบใน LINE ได้เลย",5000)};
 let shareCache=null;
 const XMIME="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 async function doShare(files){await navigator.share({files,title:files[0].name})}
